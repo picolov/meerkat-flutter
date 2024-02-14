@@ -4,6 +4,8 @@ import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
 
 import 'component.dart';
+import 'event_bus.dart';
+import 'event.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +34,7 @@ Future<void> main() async {
       '''
 <rows>
     <label>The time is?</label>
-    <button onclick="local/onClick">click here</button>
+    <button onClick="button01.onClick">click here</button>
 </rows>
 '''
     ]);
@@ -45,6 +47,10 @@ Future<void> main() async {
   String defaultPageHtml = (defaultPage.first['content'] as String).trim();
   dom.Document defaultHtmlDoc = parse(defaultPageHtml);
   dom.Element? rootElement = defaultHtmlDoc.body?.children.first;
+  eventBus.on<Event>().listen((event) {
+    // Print the runtime type. Such a set up could be used for logging.
+    print('event [${event.uri}] - ${event.content}');
+  });
   if (rootElement != null) {
     runApp(App(pageEl: rootElement));
   }
