@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class Rows extends StatelessWidget {
+class RowContainer extends StatelessWidget {
   final List<Widget> children;
 
-  const Rows({Key? key, required this.children}) : super(key: key);
+  const RowContainer({Key? key, required this.children}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

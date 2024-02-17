@@ -4,7 +4,8 @@ import '../event_bus.dart';
 import 'label.dart';
 import 'button.dart';
 import 'input_text.dart';
-import 'rows.dart';
+import 'row.dart';
+import 'column.dart';
 
 final Map<String, Function> widgetMaps = {
   "label": (Map<String, dynamic> attr) => Label(
@@ -21,7 +22,10 @@ final Map<String, Function> widgetMaps = {
           print('onchanged : $value');
         },
       ),
-  "rows": (Map<String, dynamic> attr) => Rows(
+  "row": (Map<String, dynamic> attr) => RowContainer(
+        children: attr["children"],
+      ),
+  "column": (Map<String, dynamic> attr) => ColumnContainer(
         children: attr["children"],
       ),
 };
