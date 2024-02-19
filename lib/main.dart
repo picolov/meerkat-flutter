@@ -34,14 +34,14 @@ Future<void> main() async {
       1,
       '''
 <column>
-    <row>
-      <label>label01</label>
-      <button onClick="label04.addA:return 'A';">add A to label04</button>
-    </row>
-    <column>
+  <row>
+    <label onEvent="/text.addX ==> props.text = props.text + input">text is : </label>
+    <button onClick="let output='';for (i=0; i<3; i++) {output += input.toUpperCase() + 'X'};output; ==> /text.addX">add a to text</button>
+  </row>
+  <column>
       <label>label02</label>
       <label>label03</label>
-      <label onEvent="label04.addA:setProp('text', param.value);">label04</label>
+      <label>label04</label>
     </column>
 </column>
 '''
@@ -53,10 +53,12 @@ Future<void> main() async {
   String defaultPageHtml = (defaultPage.first['content'] as String).trim();
   dom.Document defaultHtmlDoc = parse(defaultPageHtml);
   dom.Element? rootElement = defaultHtmlDoc.body?.children.first;
+
   eventBus.on<Event>().listen((event) {
     // Print the runtime type. Such a set up could be used for logging.
     print('event [${event.uri}] - ${event.content}');
   });
+
   JavascriptRuntime jsRuntime = getJavascriptRuntime();
   jsRuntime.onMessage('methodChannel', (dynamic args) {
     var methodName = args['method'];
@@ -91,7 +93,10 @@ class App extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         body: SafeArea(
-          child: Component(pageEl: pageEl),
+          child: Component(
+            pageEl: pageEl,
+            jsRuntime: jsRuntime,
+          ),
         ),
       ),
     );

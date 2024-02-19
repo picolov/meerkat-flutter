@@ -5,7 +5,11 @@ class Event {
   Event(this.uri, this.content);
 }
 
-class LocalEvent extends Event {
-  LocalEvent(String identifier, Map<String, dynamic> content)
-      : super('local/$identifier', content);
-}
+// class LocalEvent extends Event {
+//   LocalEvent(String identifier, Map<String, dynamic> content)
+//       : super(
+//             identifier.startsWith('/')
+//                 ? 'local$identifier'
+//                 : 'local/$identifier',
+//             content);
+// }
