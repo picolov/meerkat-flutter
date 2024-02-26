@@ -25,13 +25,37 @@ Future<void> main() async {
   });
 
 // Insert some records in a transaction
+/* Flags :
+  show as main page : 00,10,01,11
+  is deleted        : 00,01,10,11
+*/
   await database.transaction((txn) async {
-    int id1 = await txn.rawInsert(
+    await txn.rawInsert(
+        'INSERT INTO Pages(id, name, desc, flags, content) VALUES(?,?,?,?,?)', [
+      'DEFAULT',
+      'Default Page',
+      'Generic Page Editor',
+      1,
+      '''
+<tabBar titles="Preview, Script, Setting">
+  <column>
+    <label>Preview</label>
+  </column>
+  <column>
+    <label>Script</label>
+  </column>
+  <column>
+    <label>Setting</label>
+  </column>
+</tabBar>
+'''
+    ]);
+    await txn.rawInsert(
         'INSERT INTO Pages(id, name, desc, flags, content) VALUES(?,?,?,?,?)', [
       '001',
       'test01',
       'test page pertama',
-      1,
+      0,
       '''
 <column>
   <row>

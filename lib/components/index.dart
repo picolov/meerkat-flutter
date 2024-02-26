@@ -10,6 +10,7 @@ import 'button.dart';
 import 'input_text.dart';
 import 'row.dart';
 import 'column.dart';
+import 'tab_bar.dart';
 
 Function runScriptThenSendEvent =
     (dynamic args, String scriptAndEventNameStr, JavascriptRuntime jsRuntime) {
@@ -43,7 +44,7 @@ final Map<String, Function> widgetMaps = {
         onClick: (args) =>
             runScriptThenSendEvent(args, attr["onclick"], jsRuntime),
       ),
-  "inputText": (Map<String, dynamic> attr, List<Widget> children,
+  "inputtext": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime) =>
       InputText(
         text: attr["text"],
@@ -59,6 +60,13 @@ final Map<String, Function> widgetMaps = {
   "column": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime) =>
       ColumnContainer(
+        children: children,
+      ),
+  "tabbar": (Map<String, dynamic> attr, List<Widget> children,
+          JavascriptRuntime jsRuntime) =>
+      TabBarContainer(
+        titles:
+            attr["titles"] != null ? (attr["titles"] as String).split(",") : [],
         children: children,
       ),
 };
