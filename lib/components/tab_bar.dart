@@ -13,8 +13,13 @@ class TabBarContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     List<TabData> tabs = [];
     for (var i = 0; i < children.length; i++) {
-      tabs.add(TabData(text: titles[i], content: children[i], closable: false));
+      tabs.add(TabData(
+          text: titles[i],
+          content: children[i],
+          keepAlive: true,
+          closable: false));
     }
+    print("TAB IS REBUILDDDD!!!");
     return TabbedView(controller: TabbedViewController(tabs));
   }
 }

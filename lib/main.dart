@@ -39,10 +39,26 @@ Future<void> main() async {
       '''
 <tabBar titles="Preview, Script, Setting">
   <column>
-    <label>Preview</label>
+    <row>
+      <label onEvent="/text.addX ==> props.text = props.text + input">Preview1 - text is : </label>
+      <button onClick="let output='';for (i=0; i<3; i++) {output += input.toUpperCase() + 'X'};output; ==> /text.addX">add a to text</button>
+    </row>
+    <column>
+        <label>label02</label>
+        <label>label03</label>
+        <label>label04</label>
+      </column>
   </column>
   <column>
-    <label>Script</label>
+    <row>
+      <label onEvent="/text.addX2 ==> props.text = props.text + input">Script2 - text is : </label>
+      <button onClick="input.toUpperCase() + 'X'; ==> /text.addX2">add a to text</button>
+    </row>
+    <column>
+        <label>label02</label>
+        <label>label03</label>
+        <label>label04</label>
+      </column>
   </column>
   <column>
     <label>Setting</label>
@@ -87,8 +103,8 @@ Future<void> main() async {
   jsRuntime.onMessage('methodChannel', (dynamic args) {
     var methodName = args['method'];
     var message = args['msg'];
-    // print('method : ${methodName}');
-    // print('msg    : ${message.runtimeType} - ${message}');
+    print('method : ${methodName}');
+    print('msg    : ${message.runtimeType} - ${message}');
     switch (methodName) {
       case 'print':
         print(message);
@@ -96,6 +112,7 @@ Future<void> main() async {
       default:
     }
   });
+
   if (rootElement != null) {
     runApp(App(
       pageEl: rootElement,
@@ -111,8 +128,16 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    JsEvalResult jsResult = jsRuntime.evaluate(
-        "function print(msg) { sendMessage(\"methodChannel\", JSON.stringify({method: \"print\", msg: msg})); return;} print(\"halooo\"); ");
+    JsEvalResult jsResult = jsRuntime.evaluate('''
+    function print(msg) { sendMessage(\"methodChannel\", JSON.stringify({method: \"print\", msg: msg})); return;} print(\"halooo\"); 
+    function mapToObj(inputMap) {
+        let obj = {};
+        inputMap.forEach(function(value, key){
+            obj[key] = value
+        });
+        return obj;
+    }
+    ''');
     print(jsResult.stringResult);
     return MaterialApp(
       home: Scaffold(

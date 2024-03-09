@@ -17,13 +17,13 @@ Function runScriptThenSendEvent =
   List<String> scriptAndEventNameArr =
       scriptAndEventNameStr.split("==>").map((datum) => datum.trim()).toList();
   if (scriptAndEventNameArr.length == 1) {
-    print('scripts: NONE - so send whole args');
+    // print('scripts: NONE - so send whole args');
     eventBus.fire(Event(scriptAndEventNameArr[0], {"payload": args}));
   } else if (scriptAndEventNameArr.length == 2) {
     String jsonArgs = json.encode(args);
     String script =
         '{\nconst input = $jsonArgs;\n${scriptAndEventNameArr[0]};\n}';
-    print('scripts: $script');
+    // print('scripts: $script');
     JsEvalResult jsResult = jsRuntime.evaluate(script);
 
     eventBus
