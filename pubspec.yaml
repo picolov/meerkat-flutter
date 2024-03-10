@@ -1,5 +1,5 @@
 name: meerkat_flutter
-description: "A new Flutter project."
+description: "CharML app creator adapter in Flutter"
 publish_to: 'none'
 version: 0.1.0
 
@@ -13,6 +13,10 @@ dependencies:
   flutter_js: ^0.8.0
   flutter_layout_grid: ^2.0.5
   html: ^0.15.4
+  shake:
+    git: 
+      url: https://github.com/picolov/shake.git
+      ref: master
   sqflite: ^2.3.2
   tabbed_view: ^1.18.0
 

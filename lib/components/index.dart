@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'package:meerkat_flutter/event.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../event_bus.dart';
+import 'component_loader.dart';
 import 'label.dart';
 import 'button.dart';
 import 'input_text.dart';
@@ -32,20 +34,27 @@ Function runScriptThenSendEvent =
 };
 
 final Map<String, Function> widgetMaps = {
+  "componentloader": (Map<String, dynamic> attr, List<Widget> children,
+          JavascriptRuntime jsRuntime, Database database) =>
+      ComponentLoader(
+        componentId: attr["id"],
+        jsRuntime: jsRuntime,
+        database: database,
+      ),
   "label": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       Label(
         text: attr["text"],
       ),
   "button": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       Button(
         text: attr["text"],
         onClick: (args) =>
             runScriptThenSendEvent(args, attr["onclick"], jsRuntime),
       ),
   "inputtext": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       InputText(
         text: attr["text"],
         onChanged: (value) {
@@ -53,17 +62,17 @@ final Map<String, Function> widgetMaps = {
         },
       ),
   "row": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       RowContainer(
         children: children,
       ),
   "column": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       ColumnContainer(
         children: children,
       ),
   "tabbar": (Map<String, dynamic> attr, List<Widget> children,
-          JavascriptRuntime jsRuntime) =>
+          JavascriptRuntime jsRuntime, Database database) =>
       TabBarContainer(
         titles:
             attr["titles"] != null ? (attr["titles"] as String).split(",") : [],

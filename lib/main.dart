@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
+import 'package:shake/shake.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
@@ -38,26 +39,16 @@ Future<void> main() async {
       1,
       '''
 <tabBar titles="Preview, Script, Setting">
+  <componentLoader id="001"></componentLoader>
   <column>
     <row>
-      <label onEvent="/text.addX ==> props.text = props.text + input">Preview1 - text is : </label>
-      <button onClick="let output='';for (i=0; i<3; i++) {output += input.toUpperCase() + 'X'};output; ==> /text.addX">add a to text</button>
-    </row>
-    <column>
-        <label>label02</label>
-        <label>label03</label>
-        <label>label04</label>
-      </column>
-  </column>
-  <column>
-    <row>
-      <label onEvent="/text.addX2 ==> props.text = props.text + input">Script2 - text is : </label>
+      <label onEvent="/text.addX2 ==> props.text = props.text + 'B'">Script</label>
       <button onClick="input.toUpperCase() + 'X'; ==> /text.addX2">add a to text</button>
     </row>
     <column>
         <label>label02</label>
         <label>label03</label>
-        <label>label04</label>
+        <label onEvent="/text.addX2 ==> props.text = props.text + input">label04</label>
       </column>
   </column>
   <column>
@@ -75,13 +66,11 @@ Future<void> main() async {
       '''
 <column>
   <row>
-    <label onEvent="/text.addX ==> props.text = props.text + input">text is : </label>
-    <button onClick="let output='';for (i=0; i<3; i++) {output += input.toUpperCase() + 'X'};output; ==> /text.addX">add a to text</button>
+    <label>Page Pertama</label>
+    <button onClick="input.toUpperCase() + 'X'; ==> /text.addX">add a to text</button>
   </row>
   <column>
-      <label>label02</label>
-      <label>label03</label>
-      <label>label04</label>
+      <label onEvent="/text.addX ==> props.text = props.text + input">Will Changes</label>
     </column>
 </column>
 '''
@@ -117,6 +106,7 @@ Future<void> main() async {
     runApp(App(
       pageEl: rootElement,
       jsRuntime: jsRuntime,
+      database: database,
     ));
   }
 }
@@ -124,12 +114,69 @@ Future<void> main() async {
 class App extends StatelessWidget {
   final dom.Element pageEl;
   final JavascriptRuntime jsRuntime;
-  const App({super.key, required this.pageEl, required this.jsRuntime});
+  final Database database;
+  const App(
+      {super.key,
+      required this.pageEl,
+      required this.jsRuntime,
+      required this.database});
 
   @override
   Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: SafeArea(
+          child: Main(
+            pageEl: pageEl,
+            jsRuntime: jsRuntime,
+            database: database,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Main extends StatelessWidget {
+  final dom.Element pageEl;
+  final JavascriptRuntime jsRuntime;
+  final Database database;
+  const Main(
+      {super.key,
+      required this.pageEl,
+      required this.jsRuntime,
+      required this.database});
+
+  @override
+  Widget build(BuildContext context) {
+    ShakeDetector.autoStart(
+      onPhoneShake: () {
+        print("SHAKEEEENNN TO THE GROUND");
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                    title: Text('Back to editor view'),
+                    content: Text('Show editor view'),
+                    actions: [
+                      TextButton(
+                        child: Text("Yes"),
+                        onPressed: () {
+                          print("click Yes");
+                        },
+                      ),
+                      TextButton(
+                        child: Text("No"),
+                        onPressed: () {
+                          print("click No");
+                        },
+                      ),
+                    ]));
+      },
+      minimumShakeCount: 1,
+    );
+
     JsEvalResult jsResult = jsRuntime.evaluate('''
-    function print(msg) { sendMessage(\"methodChannel\", JSON.stringify({method: \"print\", msg: msg})); return;} print(\"halooo\"); 
+    function print(msg) { sendMessage("methodChannel", JSON.stringify({method: "print", msg: msg})); return;} print("halooo"); 
     function mapToObj(inputMap) {
         let obj = {};
         inputMap.forEach(function(value, key){
@@ -139,15 +186,10 @@ class App extends StatelessWidget {
     }
     ''');
     print(jsResult.stringResult);
-    return MaterialApp(
-      home: Scaffold(
-        body: SafeArea(
-          child: Component(
-            pageEl: pageEl,
-            jsRuntime: jsRuntime,
-          ),
-        ),
-      ),
+    return Component(
+      pageEl: pageEl,
+      jsRuntime: jsRuntime,
+      database: database,
     );
   }
 }

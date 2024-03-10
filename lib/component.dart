@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:meerkat_flutter/components/index.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'event.dart';
 import 'event_bus.dart';
@@ -12,7 +13,12 @@ import 'event_bus.dart';
 class Component extends StatefulWidget {
   final dom.Element pageEl;
   final JavascriptRuntime jsRuntime;
-  const Component({Key? key, required this.pageEl, required this.jsRuntime})
+  final Database database;
+  const Component(
+      {Key? key,
+      required this.pageEl,
+      required this.jsRuntime,
+      required this.database})
       : super(key: key);
 
   @override
@@ -84,12 +90,16 @@ class _ComponentState extends State<Component> {
       List<Widget> children = [];
       if (widget.pageEl.children.isNotEmpty) {
         for (dom.Element child in widget.pageEl.children) {
-          children.add(Component(pageEl: child, jsRuntime: widget.jsRuntime));
+          children.add(Component(
+            pageEl: child,
+            jsRuntime: widget.jsRuntime,
+            database: widget.database,
+          ));
         }
       }
       // get widget by tag and attrs
       component = widgetMaps[widget.pageEl.localName]!(
-          attrs, children, widget.jsRuntime);
+          attrs, children, widget.jsRuntime, widget.database);
     } else {
       component = Text('widget type:${widget.pageEl.localName} not found');
     }
