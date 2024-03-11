@@ -30,6 +30,19 @@ Future<void> main() async {
   show as main page : 00,10,01,11
   is deleted        : 00,01,10,11
 */
+  var stringArr = [
+    '''
+<tabBar titles="Script, Preview, Setting">
+  <column>
+    <codeEditor>content of code editor</codeEditor>
+  </column>
+  <componentLoader id="001"></componentLoader>
+  <column>
+    <label>Setting</label>
+  </column>
+</tabBar>
+'''
+  ];
   await database.transaction((txn) async {
     await txn.rawInsert(
         'INSERT INTO Pages(id, name, desc, flags, content) VALUES(?,?,?,?,?)', [
@@ -39,18 +52,10 @@ Future<void> main() async {
       1,
       '''
 <tabBar titles="Preview, Script, Setting">
-  <componentLoader id="001"></componentLoader>
   <column>
-    <row>
-      <label onEvent="/text.addX2 ==> props.text = props.text + 'B'">Script</label>
-      <button onClick="input.toUpperCase() + 'X'; ==> /text.addX2">add a to text</button>
-    </row>
-    <column>
-        <label>label02</label>
-        <label>label03</label>
-        <label onEvent="/text.addX2 ==> props.text = props.text + input">label04</label>
-      </column>
+    <codeEditor>content of code editor</codeEditor>
   </column>
+  <componentLoader id="001"></componentLoader>
   <column>
     <label>Setting</label>
   </column>

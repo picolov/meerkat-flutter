@@ -6,6 +6,7 @@ import 'package:meerkat_flutter/event.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../event_bus.dart';
+import 'code_editor.dart';
 import 'component_loader.dart';
 import 'label.dart';
 import 'button.dart';
@@ -34,6 +35,14 @@ Function runScriptThenSendEvent =
 };
 
 final Map<String, Function> widgetMaps = {
+  "codeeditor": (Map<String, dynamic> attr, List<Widget> children,
+          JavascriptRuntime jsRuntime, Database database) =>
+      CodeEditor(
+        text: attr["text"],
+        onChanged: (value) {
+          print('onchanged : $value');
+        },
+      ),
   "componentloader": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime, Database database) =>
       ComponentLoader(
