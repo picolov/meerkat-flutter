@@ -7,45 +7,74 @@ import 'package:sqflite/sqflite.dart';
 
 import '../event_bus.dart';
 import 'code_editor.dart';
-import 'component_loader.dart';
+import 'ui_loader.dart';
 import 'label.dart';
 import 'button.dart';
 import 'input_text.dart';
 import 'row.dart';
 import 'column.dart';
 import 'tab_bar.dart';
+import 'dropdown.dart';
 
 Function runScriptThenSendEvent =
     (dynamic args, String scriptAndEventNameStr, JavascriptRuntime jsRuntime) {
-  List<String> scriptAndEventNameArr =
-      scriptAndEventNameStr.split("==>").map((datum) => datum.trim()).toList();
-  if (scriptAndEventNameArr.length == 1) {
-    // print('scripts: NONE - so send whole args');
-    eventBus.fire(Event(scriptAndEventNameArr[0], {"payload": args}));
-  } else if (scriptAndEventNameArr.length == 2) {
-    String jsonArgs = json.encode(args);
-    String script =
-        '{\nconst input = $jsonArgs;\n${scriptAndEventNameArr[0]};\n}';
-    // print('scripts: $script');
-    JsEvalResult jsResult = jsRuntime.evaluate(script);
+  if (scriptAndEventNameStr.isNotEmpty) {
+    List<String> scriptAndEventNameArr =
+        scriptAndEventNameStr.split("->").map((datum) => datum.trim()).toList();
+    if (scriptAndEventNameArr.length == 1) {
+      // print('scripts: NONE - so send whole args');
+      eventBus.fire(Event(scriptAndEventNameArr[0], {"payload": args}));
+    } else if (scriptAndEventNameArr.length == 2) {
+      String jsonArgs = json.encode(args);
+      String script =
+          '{\nconst input = $jsonArgs;\n${scriptAndEventNameArr[0]};\n}';
+      // print('scripts: $script');
+      JsEvalResult jsResult = jsRuntime.evaluate(script);
 
-    eventBus
-        .fire(Event(scriptAndEventNameArr[1], {"payload": jsResult.rawResult}));
+      eventBus.fire(
+          Event(scriptAndEventNameArr[1], {"payload": jsResult.rawResult}));
+    }
+  } else {
+    print("empty scripts");
   }
 };
 
+Function parseAttributeValue = (String value) {
+  dynamic parsedValue;
+  if (value.startsWith("[") && value.endsWith("]")) {
+    parsedValue = value
+        .substring(1, value.length - 1)
+        .split(",")
+        .map((datum) => datum.trim())
+        .toList();
+  }
+  return parsedValue;
+};
+
 final Map<String, Function> widgetMaps = {
+  "dropdown": (Map<String, dynamic> attr, List<Widget> children,
+          JavascriptRuntime jsRuntime, Database database) =>
+      Dropdown(
+        options: parseAttributeValue(attr["options"]),
+        onSelect: (args) {
+          if (attr.containsKey("onselect")) {
+            runScriptThenSendEvent(args, attr["onselect"], jsRuntime);
+          }
+        },
+      ),
   "codeeditor": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime, Database database) =>
       CodeEditor(
         text: attr["text"],
-        onChanged: (value) {
-          print('onchanged : $value');
+        onSaved: (args) {
+          if (attr.containsKey("onsaved")) {
+            runScriptThenSendEvent(args, attr["onsaved"], jsRuntime);
+          }
         },
       ),
-  "componentloader": (Map<String, dynamic> attr, List<Widget> children,
+  "uiLoader": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime, Database database) =>
-      ComponentLoader(
+      UILoader(
         componentId: attr["id"],
         jsRuntime: jsRuntime,
         database: database,
@@ -59,8 +88,11 @@ final Map<String, Function> widgetMaps = {
           JavascriptRuntime jsRuntime, Database database) =>
       Button(
         text: attr["text"],
-        onClick: (args) =>
-            runScriptThenSendEvent(args, attr["onclick"], jsRuntime),
+        onClick: (args) {
+          if (attr.containsKey("onclick")) {
+            runScriptThenSendEvent(args, attr["onclick"], jsRuntime);
+          }
+        },
       ),
   "inputtext": (Map<String, dynamic> attr, List<Widget> children,
           JavascriptRuntime jsRuntime, Database database) =>

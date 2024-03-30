@@ -30,36 +30,35 @@ Future<void> main() async {
   show as main page : 00,10,01,11
   is deleted        : 00,01,10,11
 */
-  var stringArr = [
-    '''
-<tabBar titles="Script, Preview, Setting">
-  <column>
-    <codeEditor>content of code editor</codeEditor>
-  </column>
-  <componentLoader id="001"></componentLoader>
-  <column>
-    <label>Setting</label>
-  </column>
-</tabBar>
-'''
-  ];
   await database.transaction((txn) async {
     await txn.rawInsert(
         'INSERT INTO Pages(id, name, desc, flags, content) VALUES(?,?,?,?,?)', [
       'DEFAULT',
       'Default Page',
+      'default page',
+      1,
+      '''
+<ui id="dashboard"></ui>
+'''
+    ]);
+    await txn.rawInsert(
+        'INSERT INTO Pages(id, name, desc, flags, content) VALUES(?,?,?,?,?)', [
+      'dashboard',
+      'Dashboard Page',
       'Generic Page Editor',
       1,
       '''
-<tabBar titles="Preview, Script, Setting">
+<localSqlite autoSubs triggerDelete="<localSqliteID>.delete" responseDelete="<localSqliteID>.deleteResponse"></localSqlite>
+<ui onInit="[* -> <localSqliteID>.delete, ]">
   <column>
-    <codeEditor>content of code editor</codeEditor>
+    <row>
+      <dropdown options="[satu, dua, tiga]"></dropdown>
+      <button>edit</button>
+      <button>setting</button>
+    </row>
+    <ui id="001" onReceiveFrom="editor.updated"></ui>
   </column>
-  <componentLoader id="001"></componentLoader>
-  <column>
-    <label>Setting</label>
-  </column>
-</tabBar>
+</ui>
 '''
     ]);
     await txn.rawInsert(
@@ -69,15 +68,20 @@ Future<void> main() async {
       'test page pertama',
       0,
       '''
-<column>
-  <row>
-    <label>Page Pertama</label>
-    <button onClick="input.toUpperCase() + 'X'; ==> /text.addX">add a to text</button>
-  </row>
+<ui>
   <column>
-      <label onEvent="/text.addX ==> props.text = props.text + input">Will Changes</label>
-    </column>
-</column>
+    <row>
+      <label>Page Pertama</label>
+      <button onClick="add X to output -> text.addX">add a to text</button>
+    </row>
+    <column>
+        <label onReceiveFrom="receive('text.addX', (input) {props.text = props.text + input});">Will Changes</label>
+      </column>
+  </column>
+</ui>
+<function id="add X to output" lang="js" schema="">
+input.toUpperCase() + 'X';
+</script>
 '''
     ]);
   });
@@ -86,13 +90,14 @@ Future<void> main() async {
       await database.rawQuery('SELECT * FROM Pages where flags=?', [1]);
   String defaultPageHtml = (defaultPage.first['content'] as String).trim();
   dom.Document defaultHtmlDoc = parse(defaultPageHtml);
-  dom.Element? rootElement = defaultHtmlDoc.body?.children.first;
+  dom.Element? rootElement = defaultHtmlDoc.body?.children
+      .firstWhere((element) => element.localName == "ui");
 
   eventBus.on<Event>().listen((event) {
     // Print the runtime type. Such a set up could be used for logging.
     print('event [${event.uri}] - ${event.content}');
   });
-
+  print('uiRenderComp: ${rootElement?.localName}');
   JavascriptRuntime jsRuntime = getJavascriptRuntime();
   jsRuntime.onMessage('methodChannel', (dynamic args) {
     var methodName = args['method'];

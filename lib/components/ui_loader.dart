@@ -5,12 +5,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
 
-class ComponentLoader extends StatelessWidget {
+class UILoader extends StatelessWidget {
   final String componentId;
   final JavascriptRuntime jsRuntime;
   final Database database;
 
-  const ComponentLoader(
+  const UILoader(
       {Key? key,
       required this.componentId,
       required this.jsRuntime,
@@ -23,10 +23,13 @@ class ComponentLoader extends StatelessWidget {
     String componentPageHtml =
         (componentPage.first['content'] as String).trim();
     dom.Document componentHtmlDoc = parse(componentPageHtml);
-    dom.Element? componentElement = componentHtmlDoc.body?.children.first;
+    dom.Element? componentElement = componentHtmlDoc.body?.children
+        .firstWhere((element) => element.localName == "ui");
     if (componentElement != null) {
       return Component(
-          pageEl: componentElement, jsRuntime: jsRuntime, database: database);
+          pageEl: componentElement.children.first,
+          jsRuntime: jsRuntime,
+          database: database);
     } else {
       return Text("Error parsing $componentId");
     }
